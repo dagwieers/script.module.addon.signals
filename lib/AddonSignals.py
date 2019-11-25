@@ -16,9 +16,13 @@ def _getReceiver():
 
 
 def _decodeData(data):
-    data = json.loads(data)
-    if data:
-        return json.loads(base64.b64decode(data[0]))
+    encoded_data = json.loads(data)
+    if encoded_data:
+        json_data = base64.b64decode(encoded_data[0])
+        # NOTE: With Python 3.5 and older json.loads() does not support bytes or bytearray
+        if isinstance(json_data, bytes):
+            json_data = json_data.decode('utf-8')
+        return json.loads(json_data)
 
 
 def _encodeData(data):
