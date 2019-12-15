@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
+
 import sys
-import xbmc
-import xbmcaddon
 import base64
 import json
+import xbmc
+import xbmcaddon
 
 RECEIVER = None
 
 
 def _getReceiver():
-    global RECEIVER
+    global RECEIVER  # pylint: disable=global-statement
     if not RECEIVER:
         RECEIVER = SignalReceiver()
     return RECEIVER
 
 
 def _decodeData(data):
-    data = json.loads(data)
-    if data:
-        return json.loads(base64.b64decode(data[0]))
+    encoded_data = json.loads(data)
+    if encoded_data:
+        return json.loads(base64.b64decode(encoded_data[0]))
+    return None
 
 
 def _encodeData(data):
@@ -41,7 +43,7 @@ def _jsonrpc(**kwargs):
 
 
 class SignalReceiver(xbmc.Monitor):
-    def __init__(self):
+    def __init__(self):  # pylint: disable=super-init-not-called
         self._slots = {}
 
     def registerSlot(self, signaler_id, signal, callback):
@@ -108,6 +110,7 @@ def sendSignal(signal, data=None, source_id=None, sourceID=None):
     if sourceID:
         xbmc.log('++++==== script.module.addon.signals: sourceID keyword is DEPRECATED - use source_id ====++++', xbmc.LOGNOTICE)
     source_id = source_id or sourceID or xbmcaddon.Addon().getAddonInfo('id')
+    
     _jsonrpc(method='JSONRPC.NotifyAll', params=dict(
         sender='%s.SIGNAL' % source_id,
         message=signal,
